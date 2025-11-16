@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Windows;
-using MediaCatalog.Models;
 using MediaCatalog.Enums;
-using System.Collections.ObjectModel;
+using MediaCatalog.Interfaces;
 
 namespace MediaCatalog.Models
 {
@@ -13,9 +11,10 @@ namespace MediaCatalog.Models
         public int Year { get; set; }
         public string Genre { get; set; }
         public int Rating { get; set; }
-        public MediaStatus Status { get; set; }
+        public IMediaState Status { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.Now;
 
         public abstract string GetMediaType();
+        public string MediaType => GetMediaType();
     }
 }

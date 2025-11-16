@@ -2,7 +2,7 @@
 using System.Windows;
 using MediaCatalog.Models;
 using MediaCatalog.Enums;
-using System.Collections.ObjectModel;
+using MediaCatalog.Interfaces;
 
 namespace MediaCatalog.Models
 {
@@ -12,6 +12,6 @@ namespace MediaCatalog.Models
         public TimeSpan Duration { get; set; }
         public string Studio { get; set; }
 
-        public override string GetMediaType() => "Movie";
+        public override string GetMediaType() => "Фильм";
     }
 }

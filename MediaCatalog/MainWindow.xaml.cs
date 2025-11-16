@@ -1,85 +1,128 @@
 ﻿using System.Windows;
 using MediaCatalog.Models;
-using MediaCatalog.Enums;
 using System.Collections.ObjectModel;
+using MediaCatalog.Patterns.Services;
+using System.Windows.Controls;
+using System.Linq;
 
 namespace MediaCatalog
 {
     public partial class MainWindow : Window
     {
         public ObservableCollection<MediaItem> MediaItems { get; set; }
+        private MediaFacadeService _mediaService;
 
         public MainWindow()
         {
             InitializeComponent();
             MediaItems = new ObservableCollection<MediaItem>();
-            MediaListView.ItemsSource = MediaItems;
+            if (MediaListView != null)
+            {
+                MediaListView.ItemsSource = MediaItems;
+            }
+            else
+            {
+                MessageBox.Show("MediaListView не найден в XAML");
+                return;
+            }
 
+            _mediaService = new MediaFacadeService(MediaItems);
+
+            InitializeMediaTypeFilter();
             LoadSampleData();
+        }
 
-            MediaListView.SelectionChanged += (s, e) => ShowItemDetails();
+        private void InitializeMediaTypeFilter()
+        {
+            if (FilterComboBox == null) return;
+
+            FilterComboBox.Items.Clear();
+            FilterComboBox.Items.Add("Все");
+            foreach (var type in _mediaService.GetAvailableMediaTypes())
+            {
+                FilterComboBox.Items.Add(type);
+            }
+            FilterComboBox.SelectedIndex = 0;
         }
 
         private void LoadSampleData()
         {
-            MediaItems.Add(new Book
+            try
             {
-                Id = 1,
-                Title = "Война и мир",
-                Author = "Лев Толстой",
-                Year = 1869,
-                Genre = "Роман",
-                Status = MediaStatus.Completed,
-                Rating = 5,
-                PageCount = 1225
-            });
+                var book = _mediaService.CreateMedia("Книга");
+                book.Title = "Война и мир";
+                book.Year = 1869;
+                book.Genre = "Роман";
+                book.Rating = 5;
+                ((Book)book).Author = "Лев Толстой";
+                ((Book)book).PageCount = 1225;
+                _mediaService.AddMedia(book);
 
-            MediaItems.Add(new Movie
+                var movie = _mediaService.CreateMedia("Фильм");
+                movie.Title = "Крестный отец";
+                movie.Year = 1972;
+                movie.Genre = "Криминал, Драма";
+                movie.Rating = 5;
+                ((Movie)movie).Director = "Фрэнсис Форд Коппола";
+                ((Movie)movie).Duration = new System.TimeSpan(2, 55, 0);
+                _mediaService.AddMedia(movie);
+            }
+            catch (System.Exception ex)
             {
-                Id = 2,
-                Title = "Крестный отец",
-                Director = "Фрэнсис Форд Коппола",
-                Year = 1972,
-                Genre = "Криминал, Драма",
-                Status = MediaStatus.Planned,
-                Rating = 0,
-                Duration = new System.TimeSpan(2, 55, 0)
-            });
-
-            MediaItems.Add(new Game
-            {
-                Id = 3,
-                Title = "The Witcher 3: Wild Hunt",
-                Year = 2015,
-                Genre = "RPG",
-                Status = MediaStatus.InProgress,
-                Rating = 5,
-                Platform = "PC",
-                Developer = "CD Projekt Red",
-                PlayTime = 85
-            });
+                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}");
+            }
         }
 
-        private void ShowItemDetails()
+        private void AddButton_Click(object sender, RoutedEventArgs e)
         {
-            if (MediaListView.SelectedItem is MediaItem selectedItem)
+            var dialog = new Views.AddMediaDialog(_mediaService);
+            if (dialog.ShowDialog() == true)
             {
-                DetailTitle.Text = selectedItem.Title;
-                DetailType.Text = selectedItem.GetMediaType();
-                DetailYear.Text = selectedItem.Year.ToString();
-                DetailGenre.Text = selectedItem.Genre;
-                DetailStatus.Text = selectedItem.Status.ToString();
-                DetailRating.Text = selectedItem.Rating.ToString() + "/5";
+                if (MediaListView != null)
+                {
+                    MediaListView.Items.Refresh();
+                }
+            }
+        }
 
-                if (selectedItem is Book book)
-                {
-                }
-                else if (selectedItem is Movie movie)
-                {
-                }
-                else if (selectedItem is Game game)
-                {
-                }
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (MediaListView == null) return;
+
+            var searchText = SearchBox.Text;
+            if (string.IsNullOrWhiteSpace(searchText) || searchText == "Поиск...")
+            {
+                MediaListView.ItemsSource = MediaItems;
+            }
+            else
+            {
+                var results = _mediaService.SearchMedia(searchText);
+                MediaListView.ItemsSource = results;
+            }
+        }
+
+        private void FilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (MediaListView == null) return;
+
+            var selectedType = FilterComboBox.SelectedItem as string;
+            if (selectedType == "Все")
+            {
+                MediaListView.ItemsSource = MediaItems;
+            }
+            else
+            {
+                var results = _mediaService.FilterByType(selectedType);
+                MediaListView.ItemsSource = results;
+            }
+        }
+
+        private void ChangeStatusButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MediaListView?.SelectedItem is MediaItem selectedItem)
+            {
+                _mediaService.ChangeStatus(selectedItem, "Complete");
+                MediaListView.Items.Refresh();
             }
         }
     }

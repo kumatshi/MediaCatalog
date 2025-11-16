@@ -12,6 +12,6 @@ namespace MediaCatalog.Models
         public int PageCount { get; set; }
         public string ISBN { get; set; }
 
-        public override string GetMediaType() => "Book";
+        public override string GetMediaType() => "Книга";
     }
 }
