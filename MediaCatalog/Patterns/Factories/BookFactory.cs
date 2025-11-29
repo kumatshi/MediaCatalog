@@ -7,10 +7,19 @@ namespace MediaCatalog.Patterns.Factories
     {
         public MediaItem CreateMediaItem()
         {
-            return new Book
+            var book = new Book
             {
-                Status = new Patterns.States.PlannedState()
+                Status = new Patterns.States.PlannedState(),
+                StatusType = "PlannedState",
+                Title = "Новая книга",
+                Year = DateTime.Now.Year,
+                Genre = "Не указан",
+                Rating = 0,
+                Author = "",
+                PageCount = 0,
+                ISBN = ""
             };
+            return book;
         }
 
         public string GetMediaType() => "Книга";

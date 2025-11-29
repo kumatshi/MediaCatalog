@@ -1,7 +1,7 @@
 ﻿<Window x:Class="MediaCatalog.Views.AddMediaDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Добавить медиа" Height="400" Width="400"
+        Title="Добавить медиа" Height="450" Width="400"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
 
@@ -14,6 +14,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -38,13 +39,20 @@
         <TextBox Grid.Row="3" Grid.Column="1" Name="GenreTextBox" Margin="0,0,0,10" Height="25"
                  Text="{Binding Genre, UpdateSourceTrigger=PropertyChanged}"/>
 
-        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Name="SpecificFieldsPanel" 
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Рейтинг:" Margin="0,0,10,10" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="4" Grid.Column="1" Name="RatingTextBox" Margin="0,0,0,10" Height="25"
+                 Text="{Binding Rating, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Name="SpecificFieldsPanel" 
                     Margin="0,0,0,10"/>
+        <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Name="ValidationMessageText" 
+                   Text="{Binding ValidationMessage}"
+                   Foreground="Red" TextWrapping="Wrap" Margin="0,10,0,10"/>
 
         <StackPanel Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" 
                     HorizontalAlignment="Right">
             <Button Content="Сохранить" Name="SaveButton" Width="80" Height="30" Margin="5" 
-                    Click="SaveButton_Click" IsDefault="True"/>
+                    Click="SaveButton_Click" IsDefault="True" IsEnabled="{Binding IsValid}"/>
             <Button Content="Отмена" Name="CancelButton" Width="80" Height="30" Margin="5" 
                     Click="CancelButton_Click" IsCancel="True"/>
         </StackPanel>

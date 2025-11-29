@@ -7,10 +7,19 @@ namespace MediaCatalog.Patterns.Factories
     {
         public MediaItem CreateMediaItem()
         {
-            return new Game
+            var game = new Game
             {
-                Status = new Patterns.States.PlannedState()
+                Status = new Patterns.States.PlannedState(),
+                StatusType = "PlannedState",
+                Title = "Новая игра",
+                Year = DateTime.Now.Year,
+                Genre = "Не указан",
+                Rating = 0,
+                Platform = "",
+                Developer = "",
+                PlayTime = 0
             };
+            return game;
         }
 
         public string GetMediaType() => "Игра";
