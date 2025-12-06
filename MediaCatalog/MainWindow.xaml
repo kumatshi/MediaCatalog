@@ -4,8 +4,8 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:fa="clr-namespace:FontAwesome.WPF;assembly=FontAwesome.WPF"
         Title="Media Catalog"
-        Width="900"
-        Height="600"
+        Width="1280"
+        Height="720"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource MaterialDesignPaper}">
 
@@ -14,11 +14,13 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml"/>
                 <materialDesign:BundledTheme BaseTheme="Dark"
-                                             PrimaryColor="DeepOrange"
-                                             SecondaryColor="Orange" />
+                             PrimaryColor="Brown"
+                             SecondaryColor="Amber" />
 
             </ResourceDictionary.MergedDictionaries>
-            
+           
+            <SolidColorBrush x:Key="MaterialDesignPrimaryColorBrush" Color="{StaticResource CaramelColor}"/>
+            <SolidColorBrush x:Key="MaterialDesignSecondaryColorBrush" Color="{StaticResource CopperColor}"/>
             <Color x:Key="SandColor">#EACCA3</Color>
             <Color x:Key="CaramelColor">#CE9258</Color>
             <Color x:Key="VeryDarkBrownColor">#280F05</Color>
@@ -115,20 +117,14 @@
 
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" Margin="6">
 
-                <TextBox Name="SearchBox" Width="230" Height="36" Margin="4"
+                <TextBox Name="SearchBox" Width="230" Height="60" Margin="4"
                          materialDesign:HintAssist.Hint="Поиск..."
                          TextChanged="SearchBox_TextChanged"
                          Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
 
-                <ComboBox Name="FilterComboBox" Width="160" Height="36" Margin="4"
+                <ComboBox Name="FilterComboBox" Width="160" Height="60" Margin="4"
                           SelectionChanged="FilterComboBox_SelectionChanged"
                           Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
-
-                <ToggleButton Width="48" Height="36" Margin="4"
-                              Click="ThemeToggle_Click"
-                              ToolTip="Сменить тему">
-                    <fa:ImageAwesome Icon="Adjust" Width="18"/>
-                </ToggleButton>
 
             </StackPanel>
         </DockPanel>
@@ -146,7 +142,7 @@
                       ItemContainerStyle="{StaticResource ListItemContainerStyle}">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel />
+                        <UniformGrid Columns="3" />
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
 

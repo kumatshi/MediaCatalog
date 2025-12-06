@@ -53,42 +53,6 @@ namespace MediaCatalog
         }
       
         /// <summary>
-        /// Обработчик переключения темы 
-        /// </summary>
-        private void ThemeToggle_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var dicts = Application.Current.Resources.MergedDictionaries;
-
-                var darkUri = new Uri("pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Dark.xaml");
-                var lightUri = new Uri("pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml");
-
-                var darkDict = dicts.FirstOrDefault(d => d.Source != null && d.Source.Equals(darkUri));
-                var lightDict = dicts.FirstOrDefault(d => d.Source != null && d.Source.Equals(lightUri));
-
-                if (darkDict != null && lightDict == null)
-                {
-                    dicts.Remove(darkDict);
-                    dicts.Add(new ResourceDictionary { Source = lightUri });
-                }
-                else if (lightDict != null && darkDict == null)
-                {
-                    dicts.Remove(lightDict);
-                    dicts.Add(new ResourceDictionary { Source = darkUri });
-                }
-                else if (darkDict == null && lightDict == null)
-                {
-                    dicts.Add(new ResourceDictionary { Source = darkUri });
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowError("Ошибка переключения темы", ex);
-            }
-        }
-
-        /// <summary>
         /// Инициализирует компоненты пользовательского интерфейса
         /// </summary>
         private void InitializeUIComponents()
