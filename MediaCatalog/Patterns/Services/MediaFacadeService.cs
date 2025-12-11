@@ -60,7 +60,8 @@ namespace MediaCatalog.Patterns.Services
             {
                 new BookFactory(),
                 new MovieFactory(),
-                new GameFactory()
+                new GameFactory(),
+                new MusicFactory()
             };
         }
 

@@ -51,6 +51,7 @@ namespace MediaCatalog.Services
                 var books = _context.Books.ToList();
                 var movies = _context.Movies.ToList();
                 var games = _context.Games.ToList();
+                var musics = _context.Musics.ToList();
 
                 foreach (var book in books)
                 {
@@ -68,6 +69,11 @@ namespace MediaCatalog.Services
                 {
                     game.Status = CreateStateFromString(game.StatusType);
                     allItems.Add(game);
+                }
+                foreach (var music in musics) // Добавить этот блок
+                {
+                    music.Status = CreateStateFromString(music.StatusType);
+                    allItems.Add(music);
                 }
             }
             catch (Exception ex)
@@ -119,6 +125,13 @@ namespace MediaCatalog.Services
                     else
                         _context.Games.Update(game);
                 }
+                else if (item is Music music) // ДОБАВЬТЕ ЭТОТ БЛОК
+                {
+                    if (music.Id == 0)
+                        _context.Musics.Add(music);
+                    else
+                        _context.Musics.Update(music);
+                }
                 else
                 {
                     throw new InvalidOperationException($"Неизвестный тип медиа: {item.GetType().Name}");
@@ -149,6 +162,8 @@ namespace MediaCatalog.Services
                     _context.Movies.Remove(movie);
                 else if (item is Game game)
                     _context.Games.Remove(game);
+                else if (item is Music music) // ДОБАВЬТЕ
+                    _context.Musics.Remove(music);
 
                 _context.SaveChanges();
             }
@@ -182,6 +197,8 @@ namespace MediaCatalog.Services
                     _context.Movies.Update(movie);
                 else if (item is Game game)
                     _context.Games.Update(game);
+                else if (item is Music music) // ДОБАВЬТЕ
+                    _context.Musics.Update(music);
 
                 _context.SaveChanges();
             }
@@ -220,5 +237,6 @@ namespace MediaCatalog.Services
             MessageBox.Show(errorMessage, "Ошибка",
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
+
     }
 }

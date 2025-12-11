@@ -4,6 +4,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace MediaCatalog.Views
 {
@@ -115,6 +116,87 @@ namespace MediaCatalog.Views
                     AddTextField("Платформа:", nameof(Game.Platform), game.Platform, true);
                     AddTextField("Разработчик:", nameof(Game.Developer), game.Developer, true);
                     AddNumericField("Время игры (часы):", nameof(Game.PlayTime), game.PlayTime.ToString(), false);
+                }
+                else if (_newItem is Music music) // Добавить этот блок
+                {
+                    AddTextField("Исполнитель:", nameof(Music.Artist), music.Artist, true);
+                    AddTextField("Альбом:", nameof(Music.Album), music.Album, false);
+                    AddDurationField("Длительность:", nameof(Music.Duration), music.Duration.ToString(@"hh\:mm\:ss"), true);
+                    AddTextField("Формат:", nameof(Music.Format), music.Format, true);
+
+
+                    var fileButtonPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 5, 0, 5) };
+                    var fileLabel = new TextBlock
+                    {
+                        Text = "Файл музыки:",
+                        Width = 120,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+
+                    var filePathTextBox = new TextBox
+                    {
+                        Text = music.FilePath,
+                        Width = 150,
+                        Height = 25,
+                        IsReadOnly = true
+                    };
+
+                    var browseButton = new Button
+                    {
+                        Content = "Выбрать...",
+                        Width = 80,
+                        Height = 25,
+                        Margin = new Thickness(5, 0, 0, 0)
+                    };
+
+                    browseButton.Click += (s, e) =>
+                    {
+                        var openFileDialog = new Microsoft.Win32.OpenFileDialog
+                        {
+                            Filter = "Аудио файлы (*.mp3;*.wav;*.flac;*.ogg;*.m4a)|*.mp3;*.wav;*.flac;*.ogg;*.m4a|Все файлы (*.*)|*.*",
+                            Title = "Выберите аудио файл"
+                        };
+
+                        if (openFileDialog.ShowDialog() == true)
+                        {
+                            var fileInfo = new System.IO.FileInfo(openFileDialog.FileName);
+                            filePathTextBox.Text = openFileDialog.FileName;
+                            music.FilePath = openFileDialog.FileName;
+                            music.FileSize = fileInfo.Length;
+                            music.Format = System.IO.Path.GetExtension(openFileDialog.FileName).TrimStart('.').ToLower();
+
+                            try
+                            {
+                                var tagFile = TagLib.File.Create(openFileDialog.FileName);
+                                if (!string.IsNullOrWhiteSpace(tagFile.Tag.Title))
+                                    music.Title = tagFile.Tag.Title;
+                                if (tagFile.Tag.Artists != null && tagFile.Tag.Artists.Length > 0)
+                                    music.Artist = tagFile.Tag.Artists[0];
+                                if (!string.IsNullOrWhiteSpace(tagFile.Tag.Album))
+                                    music.Album = tagFile.Tag.Album;
+                                if (tagFile.Tag.Year > 0)
+                                    music.Year = (int)tagFile.Tag.Year;
+                                if (tagFile.Tag.Genres != null && tagFile.Tag.Genres.Length > 0)
+                                    music.Genre = tagFile.Tag.Genres[0];
+                                if (tagFile.Properties.Duration.TotalSeconds > 0)
+                                    music.Duration = tagFile.Properties.Duration;
+
+                                TitleTextBox.Text = music.Title;
+                                YearTextBox.Text = music.Year.ToString();
+                                GenreTextBox.Text = music.Genre;
+                                UpdateProperty(nameof(Music.Artist), music.Artist);
+                                UpdateProperty(nameof(Music.Album), music.Album);
+                                UpdateProperty(nameof(Music.Duration), music.Duration);
+                                UpdateProperty(nameof(Music.Format), music.Format);
+                            }
+                            catch { /* Игнорируем ошибки чтения метаданных */ }
+                        }
+                    };
+
+                    fileButtonPanel.Children.Add(fileLabel);
+                    fileButtonPanel.Children.Add(filePathTextBox);
+                    fileButtonPanel.Children.Add(browseButton);
+                    SpecificFieldsPanel.Children.Add(fileButtonPanel);
                 }
             }
             catch (Exception ex)

@@ -170,7 +170,30 @@ namespace MediaCatalog
                 AddDetailField("Разработчик:", game.Developer ?? "Не указано");
                 AddDetailField("Время игры (часы):", game.PlayTime.ToString());
             }
+            else if (item is Music music) 
+            {
+                AddDetailField("Исполнитель:", music.Artist ?? "Не указано");
+                AddDetailField("Альбом:", music.Album ?? "Не указано");
+                AddDetailField("Длительность:", music.Duration.ToString(@"hh\:mm\:ss"));
+                AddDetailField("Формат:", music.Format ?? "Не указано");
+                AddDetailField("Размер файла:", FormatFileSize(music.FileSize));
+            }
         }
+
+        private string FormatFileSize(long bytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            double len = bytes;
+            int order = 0;
+            while (len >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                len = len / 1024;
+            }
+            return $"{len:0.##} {sizes[order]}";
+        }
+
+    
 
         /// <summary>
         /// Очищает детальную информацию
@@ -540,6 +563,19 @@ namespace MediaCatalog
             catch (Exception ex)
             {
                 ShowError("Ошибка при закрытии приложения", ex);
+            }
+        }
+        private void MusicButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var musicWindow = new Views.MusicPlayerWindow(_mediaService, MediaItems);
+                musicWindow.Owner = this;
+                musicWindow.Show();
+            }
+            catch (Exception ex)
+            {
+                ShowError("Ошибка открытия музыкального плеера", ex);
             }
         }
     }
