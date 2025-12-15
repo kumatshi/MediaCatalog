@@ -58,12 +58,17 @@ namespace MediaCatalog.Database
                 entity.Property(e => e.Year);
                 entity.Property(e => e.Rating);
                 entity.Property(e => e.DateAdded)
-                      .HasColumnType("timestamp without time zone")
-                      .HasDefaultValueSql("NOW()");
+                    .HasColumnType("timestamp without time zone")
+                    .HasDefaultValueSql("NOW()");
                 entity.Property(e => e.StatusType).HasMaxLength(50);
                 entity.Property(e => e.Director).HasMaxLength(100);
                 entity.Property(e => e.Duration);
                 entity.Property(e => e.Studio).HasMaxLength(100);
+                entity.Property(e => e.Plot);
+                entity.Property(e => e.Actors).HasMaxLength(500);
+                entity.Property(e => e.ImdbID).HasMaxLength(20);
+                entity.Property(e => e.ImdbRating).HasMaxLength(10);
+                entity.Property(e => e.CoverImagePath).HasMaxLength(500);
             });
             modelBuilder.Entity<Game>(entity =>
             {

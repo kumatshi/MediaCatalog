@@ -31,9 +31,14 @@ namespace MediaCatalog.Models
         [StringLength(100, ErrorMessage = "Название студии не может превышать 100 символов")]
         public string Studio { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Получает тип медиа-контента
-        /// </summary>
+    
+        public string Plot { get; set; } = string.Empty;
+        public string Actors { get; set; } = string.Empty;
+        public string ImdbID { get; set; } = string.Empty;
+        public string ImdbRating { get; set; } = string.Empty;
+        public string CoverImagePath { get; set; }
+
+
         public override string GetMediaType() => "Фильм";
 
         /// <summary>

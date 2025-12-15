@@ -8,6 +8,7 @@ using MediaCatalog.Models;
 using MediaCatalog.Patterns.Services;
 using Microsoft.Win32;
 using System.Diagnostics;
+using System.Windows.Media;
 
 namespace MediaCatalog.Views
 {

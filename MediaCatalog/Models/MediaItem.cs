@@ -57,6 +57,7 @@ namespace MediaCatalog.Models
         /// Дата добавления элемента в каталог
         /// </summary>
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
+        public string CoverImagePath { get; set; } = string.Empty;
 
         /// <summary>
         /// Получает тип медиа-контента

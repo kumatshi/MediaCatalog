@@ -5,6 +5,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.ComponentModel;
 using System.Diagnostics;
+using MediaCatalog.Services;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Threading.Tasks;
+using Microsoft.Win32;
+using System.IO;
 
 namespace MediaCatalog.Views
 {
@@ -16,6 +22,9 @@ namespace MediaCatalog.Views
         private readonly MediaFacadeService _mediaService;
         private MediaItem _newItem;
         private string _validationMessage = string.Empty;
+        private string _currentTitle = "";
+
+        public bool IsMovie => _newItem is Movie;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -45,9 +54,24 @@ namespace MediaCatalog.Views
         {
             InitializeComponent();
             _mediaService = mediaService ?? throw new ArgumentNullException(nameof(mediaService));
+            _newItem = new Movie
+            {
+                Title = "",
+                Year = DateTime.Now.Year,
+                Genre = "",
+                Rating = 0
+            };
 
             InitializeMediaTypes();
             DataContext = this;
+            TitleTextBox.TextChanged += TitleTextBox_TextChanged;
+            TitleTextBox.LostFocus += TitleTextBox_LostFocus;
+            this.Loaded += AddMediaDialog_Loaded;
+        }
+
+        private void AddMediaDialog_Loaded(object sender, RoutedEventArgs e)
+        {
+            UpdateSpecificFields();
         }
 
         /// <summary>
@@ -69,18 +93,29 @@ namespace MediaCatalog.Views
         /// <summary>
         /// Обрабатывает изменение выбранного типа медиа
         /// </summary>
-        private void MediaTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void MediaTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             try
             {
                 if (MediaTypeComboBox.SelectedItem == null) return;
 
+                string currentTitle = _currentTitle;
+                int currentYear = 0;
+                if (!string.IsNullOrEmpty(YearTextBox.Text) && int.TryParse(YearTextBox.Text, out int year))
+                    currentYear = year;
+
                 _newItem = _mediaService.CreateMedia(MediaTypeComboBox.SelectedItem as string);
-                DataContext = _newItem;
-                TitleTextBox.TextChanged += (s, args) => ValidateData();
-                YearTextBox.TextChanged += (s, args) => ValidateData();
-                GenreTextBox.TextChanged += (s, args) => ValidateData();
-                RatingTextBox.TextChanged += (s, args) => ValidateData();
+
+                if (!string.IsNullOrEmpty(currentTitle))
+                    _newItem.Title = currentTitle;
+                _newItem.Year = currentYear;
+
+                TitleTextBox.Text = _newItem.Title;
+                YearTextBox.Text = _newItem.Year > 0 ? _newItem.Year.ToString() : "";
+                GenreTextBox.Text = _newItem.Genre ?? "";
+
+                OnPropertyChanged(nameof(IsMovie));
+
                 UpdateSpecificFields();
                 ValidateData();
             }
@@ -108,7 +143,8 @@ namespace MediaCatalog.Views
                 else if (_newItem is Movie movie)
                 {
                     AddTextField("Режиссер:", nameof(Movie.Director), movie.Director, true);
-                    AddDurationField("Длительность (чч:мм):", nameof(Movie.Duration), movie.Duration.ToString(@"hh\:mm"), true);
+                    AddDurationField("Длительность (чч:мм):", nameof(Movie.Duration),
+                        movie.Duration > TimeSpan.Zero ? movie.Duration.ToString(@"hh\:mm") : "", true);
                     AddTextField("Студия:", nameof(Movie.Studio), movie.Studio, false);
                 }
                 else if (_newItem is Game game)
@@ -117,13 +153,13 @@ namespace MediaCatalog.Views
                     AddTextField("Разработчик:", nameof(Game.Developer), game.Developer, true);
                     AddNumericField("Время игры (часы):", nameof(Game.PlayTime), game.PlayTime.ToString(), false);
                 }
-                else if (_newItem is Music music) // Добавить этот блок
+                else if (_newItem is Music music)
                 {
                     AddTextField("Исполнитель:", nameof(Music.Artist), music.Artist, true);
                     AddTextField("Альбом:", nameof(Music.Album), music.Album, false);
-                    AddDurationField("Длительность:", nameof(Music.Duration), music.Duration.ToString(@"hh\:mm\:ss"), true);
+                    AddDurationField("Длительность:", nameof(Music.Duration),
+                        music.Duration > TimeSpan.Zero ? music.Duration.ToString(@"hh\:mm\:ss") : "", true);
                     AddTextField("Формат:", nameof(Music.Format), music.Format, true);
-
 
                     var fileButtonPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 5, 0, 5) };
                     var fileLabel = new TextBlock
@@ -159,7 +195,7 @@ namespace MediaCatalog.Views
 
                         if (openFileDialog.ShowDialog() == true)
                         {
-                            var fileInfo = new System.IO.FileInfo(openFileDialog.FileName);
+                            var fileInfo = new FileInfo(openFileDialog.FileName);
                             filePathTextBox.Text = openFileDialog.FileName;
                             music.FilePath = openFileDialog.FileName;
                             music.FileSize = fileInfo.Length;
@@ -189,7 +225,9 @@ namespace MediaCatalog.Views
                                 UpdateProperty(nameof(Music.Duration), music.Duration);
                                 UpdateProperty(nameof(Music.Format), music.Format);
                             }
-                            catch { /* Игнорируем ошибки чтения метаданных */ }
+                            catch 
+                            { 
+                            }
                         }
                     };
 
@@ -202,6 +240,35 @@ namespace MediaCatalog.Views
             catch (Exception ex)
             {
                 ShowError("Ошибка обновления полей", ex);
+            }
+        }
+
+        /// <summary>
+        /// Обработчик изменения названия
+        /// </summary>
+        private void TitleTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _currentTitle = TitleTextBox.Text;
+            if (_newItem != null)
+            {
+                _newItem.Title = _currentTitle;
+                ValidateData();
+            }
+        }
+
+        /// <summary>
+        /// Обработчик потери фокуса названия
+        /// </summary>
+        private void TitleTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+           
+            if (_newItem is Movie movie &&
+                !string.IsNullOrWhiteSpace(movie.Title) &&
+                movie.Title.Length > 3 &&
+                movie.Title != "Новый фильм" &&
+                movie.Title != "Новый элемент")
+            {
+                _ = AutoSearchMovie(movie); 
             }
         }
 
@@ -329,6 +396,15 @@ namespace MediaCatalog.Views
                 }
                 catch
                 {
+                 
+                    try
+                    {
+                        property.SetValue(_newItem, value?.ToString());
+                    }
+                    catch
+                    {
+                       
+                    }
                 }
             }
         }
@@ -344,7 +420,9 @@ namespace MediaCatalog.Views
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(_newItem.Title) || _newItem.Title == "Новый элемент")
+            if (string.IsNullOrWhiteSpace(_newItem.Title) ||
+                _newItem.Title == "Новый элемент" ||
+                _newItem.Title == "Новый фильм")
             {
                 ValidationMessage = "Введите название медиа";
                 return;
@@ -359,12 +437,6 @@ namespace MediaCatalog.Views
             if (_newItem.Rating < 0 || _newItem.Rating > 5)
             {
                 ValidationMessage = "Рейтинг должен быть от 0 до 5";
-                return;
-            }
-
-            if (!_newItem.IsValid())
-            {
-                ValidationMessage = "Заполните все обязательные поля корректными данными";
                 return;
             }
 
@@ -387,7 +459,9 @@ namespace MediaCatalog.Views
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(_newItem?.Title) || _newItem.Title == "Новый элемент")
+                if (string.IsNullOrWhiteSpace(_newItem?.Title) ||
+                    _newItem.Title == "Новый элемент" ||
+                    _newItem.Title == "Новый фильм")
                 {
                     MessageBox.Show("Введите название медиа", "Ошибка",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -407,7 +481,8 @@ namespace MediaCatalog.Views
                         MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                _newItem.DateAdded = DateTime.UtcNow;
+
+                _newItem.DateAdded = DateTime.Now;
                 _mediaService.AddMedia(_newItem);
                 DialogResult = true;
                 Close();
@@ -439,9 +514,258 @@ namespace MediaCatalog.Views
 
         /// <summary>
         /// Вызывает событие PropertyChanged
+        /// </summary>
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        /// <summary>
+        /// Обрабатывает нажатие кнопки поиска на OMDb
+        /// </summary>
+        private async void FindOmdbButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_newItem is Movie movie)
+            {
+                string title = TitleTextBox.Text?.Trim();
+
+                if (string.IsNullOrWhiteSpace(title) ||
+                    title == "Новый фильм" ||
+                    title.Length < 2)
+                {
+                    MessageBox.Show("Введите название фильма перед поиском\n(минимум 2 символа)",
+                        "Предупреждение",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
+                try
+                {
+                    var button = sender as Button;
+                    if (button != null)
+                    {
+                        button.IsEnabled = false;
+                        button.Content = "Поиск...";
+                        Mouse.OverrideCursor = Cursors.Wait;
+                    }
+
+                    var omdbService = new OmdbService();
+
+                    int? searchYear = null;
+                    if (!string.IsNullOrWhiteSpace(YearTextBox.Text) &&
+                        int.TryParse(YearTextBox.Text, out int year) &&
+                        year > 1800)
+                    {
+                        searchYear = year;
+                    }
+
+                    var movieInfo = await omdbService.GetMovieInfoAsync(title, searchYear);
+
+                    if (movieInfo != null)
+                    {
+                        var confirmResult = MessageBox.Show(
+                            $"Найден фильм: {movieInfo.Title} ({movieInfo.Year})\n" +
+                            $"Режиссер: {movieInfo.Director}\n" +
+                            $"Рейтинг IMDb: {movieInfo.ImdbRating}\n" +
+                            $"Жанр: {movieInfo.Genre}\n\n" +
+                            $"Заполнить данные (включая обложку)?",
+                            "Фильм найден",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Question);
+
+                        if (confirmResult == MessageBoxResult.Yes)
+                        {
+                            movie.Title = movieInfo.Title;
+                            movie.Year = movieInfo.Year;
+                            movie.Director = movieInfo.Director ?? movie.Director;
+                            movie.Duration = movieInfo.Runtime;
+                            movie.Genre = movieInfo.Genre ?? movie.Genre;
+                            movie.Plot = movieInfo.Plot ?? "";
+                            movie.Actors = movieInfo.Actors ?? "";
+                            movie.ImdbID = movieInfo.ImdbID ?? "";
+                            movie.ImdbRating = movieInfo.ImdbRating ?? "";
+
+                            if (!string.IsNullOrEmpty(movieInfo.PosterPath))
+                            {
+                                try
+                                {
+                                    string imagePath = await DownloadAndSavePoster(movieInfo.PosterPath, movieInfo.Title);
+                                    movie.CoverImagePath = imagePath;
+
+                                    MessageBox.Show($"Данные фильма обновлены!\nОбложка сохранена: {imagePath}",
+                                        "Успешно",
+                                        MessageBoxButton.OK,
+                                        MessageBoxImage.Information);
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show($"Данные обновлены, но не удалось сохранить обложку: {ex.Message}",
+                                        "Предупреждение",
+                                        MessageBoxButton.OK,
+                                        MessageBoxImage.Warning);
+                                    movie.CoverImagePath = movieInfo.PosterPath; 
+                                }
+                            }
+                            else
+                            {
+                                movie.CoverImagePath = ""; 
+                            }
+
+                            TitleTextBox.Text = movie.Title;
+                            YearTextBox.Text = movie.Year.ToString();
+                            GenreTextBox.Text = movie.Genre;
+
+                            UpdateSpecificFields();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Фильм '{title}' не найден на OMDb.\nПопробуйте другое название или проверьте написание.",
+                            "Не найдено",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка поиска: {ex.Message}",
+                        "Ошибка",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+                finally
+                {
+                    var button = sender as Button;
+                    if (button != null)
+                    {
+                        button.IsEnabled = true;
+                        button.Content = "Найти на OMDb";
+                        Mouse.OverrideCursor = null;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Скачивает и сохраняет постер фильма
+        /// </summary>
+        private async Task<string> DownloadAndSavePoster(string posterUrl, string movieTitle)
+        {
+            if (string.IsNullOrEmpty(posterUrl) || posterUrl == "N/A")
+                return "";
+
+            try
+            {
+                using (var httpClient = new System.Net.Http.HttpClient())
+                {
+                    var imageBytes = await httpClient.GetByteArrayAsync(posterUrl);
+
+                    string appFolder = AppDomain.CurrentDomain.BaseDirectory;
+                    string coversFolder = System.IO.Path.Combine(appFolder, "Covers");
+
+                    if (!System.IO.Directory.Exists(coversFolder))
+                        System.IO.Directory.CreateDirectory(coversFolder);
+
+                    string safeTitle = System.IO.Path.GetInvalidFileNameChars()
+                        .Aggregate(movieTitle, (current, c) => current.Replace(c, '_'));
+
+                    string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                    string fileName = $"{safeTitle}_{timestamp}.jpg";
+                    string filePath = System.IO.Path.Combine(coversFolder, fileName);
+
+                    await System.IO.File.WriteAllBytesAsync(filePath, imageBytes);
+
+                    return filePath; 
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ошибка при сохранении обложки: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Автоматический поиск информации о фильме
+        /// </summary>
+        private async Task AutoSearchMovie(Movie movie)
+        {
+            if (string.IsNullOrWhiteSpace(movie.Title) ||
+                movie.Title == "Новый фильм" ||
+                movie.Title.Length < 3)
+                return;
+
+            try
+            {
+                var omdbService = new OmdbService();
+                var movieInfo = await omdbService.GetMovieInfoAsync(movie.Title,
+                    movie.Year > 1800 ? movie.Year : (int?)null);
+
+                if (movieInfo != null)
+                {
+                    if (string.IsNullOrWhiteSpace(movie.Director) && !string.IsNullOrWhiteSpace(movieInfo.Director))
+                    {
+                        movie.Director = movieInfo.Director;
+                        UpdateSpecificFields();
+                    }
+
+                    if (movie.Duration == TimeSpan.Zero && movieInfo.Runtime > TimeSpan.Zero)
+                    {
+                        movie.Duration = movieInfo.Runtime;
+                        UpdateSpecificFields();
+                    }
+
+                    if (string.IsNullOrWhiteSpace(movie.Genre) && !string.IsNullOrWhiteSpace(movieInfo.Genre))
+                    {
+                        movie.Genre = movieInfo.Genre;
+                        GenreTextBox.Text = movie.Genre;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(movie.CoverImagePath) &&
+                        !string.IsNullOrEmpty(movieInfo.PosterPath) &&
+                        movieInfo.PosterPath != "N/A")
+                    {
+                        try
+                        {
+                            string imagePath = await DownloadAndSavePoster(movieInfo.PosterPath, movieInfo.Title);
+                            movie.CoverImagePath = imagePath;
+                        }
+                        catch 
+                        {
+                         
+                        }
+                    }
+                }
+            }
+            catch
+            {
+               
+            }
+        }
+
+        /// <summary>
+        /// Обработчик изменения года
+        /// </summary>
+        private void YearTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_newItem != null && int.TryParse(YearTextBox.Text, out int year))
+            {
+                _newItem.Year = year;
+                ValidateData();
+            }
+        }
+
+        /// <summary>
+        /// Обработчик изменения жанра
+        /// </summary>
+        private void GenreTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_newItem != null)
+            {
+                _newItem.Genre = GenreTextBox.Text;
+                ValidateData();
+            }
+        }
+
     }
 }

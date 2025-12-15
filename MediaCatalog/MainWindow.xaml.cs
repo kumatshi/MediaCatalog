@@ -104,20 +104,26 @@ namespace MediaCatalog
         /// </summary>
         private void MediaListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            try
+            if (MediaListView.SelectedItem is MediaItem selectedItem)
             {
-                if (MediaListView.SelectedItem is MediaItem selectedItem)
-                {
-                    ShowItemDetails(selectedItem);
-                }
-                else
-                {
-                    ClearItemDetails();
-                }
+               
+                DetailTitle.Text = selectedItem.Title;
+                DetailType.Text = selectedItem.MediaType;
+                DetailYear.Text = selectedItem.Year.ToString();
+                DetailGenre.Text = selectedItem.Genre;
+                DetailStatus.Text = selectedItem.Status?.Name ?? "Не указан";
+                DetailRating.Text = selectedItem.Rating.ToString("F1");
+                DetailDateAdded.Text = selectedItem.DateAdded.ToString("dd.MM.yyyy");
             }
-            catch (Exception ex)
+            else
             {
-                ShowError("Ошибка отображения деталей", ex);
+                DetailTitle.Text = "";
+                DetailType.Text = "";
+                DetailYear.Text = "";
+                DetailGenre.Text = "";
+                DetailStatus.Text = "";
+                DetailRating.Text = "";
+                DetailDateAdded.Text = "";
             }
         }
 
@@ -163,6 +169,18 @@ namespace MediaCatalog
                 AddDetailField("Режиссер:", movie.Director ?? "Не указано");
                 AddDetailField("Длительность:", movie.Duration.ToString(@"hh\:mm"));
                 AddDetailField("Студия:", movie.Studio ?? "Не указано");
+
+                if (!string.IsNullOrEmpty(movie.Plot))
+                    AddDetailField("Описание:", movie.Plot);
+
+                if (!string.IsNullOrEmpty(movie.Actors))
+                    AddDetailField("Актеры:", movie.Actors);
+
+                if (!string.IsNullOrEmpty(movie.ImdbRating))
+                    AddDetailField("Рейтинг IMDb:", movie.ImdbRating);
+
+                if (!string.IsNullOrEmpty(movie.ImdbID))
+                    AddDetailField("IMDb ID:", movie.ImdbID);
             }
             else if (item is Game game)
             {

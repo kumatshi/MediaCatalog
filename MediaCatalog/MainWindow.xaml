@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:fa="clr-namespace:FontAwesome.WPF;assembly=FontAwesome.WPF"
+        xmlns:local="clr-namespace:MediaCatalog"
         Title="Media Catalog"
         Width="1280"
         Height="720"
@@ -16,11 +17,10 @@
                 <materialDesign:BundledTheme BaseTheme="Dark"
                              PrimaryColor="Brown"
                              SecondaryColor="Amber" />
-
             </ResourceDictionary.MergedDictionaries>
-           
-            <SolidColorBrush x:Key="MaterialDesignPrimaryColorBrush" Color="{StaticResource CaramelColor}"/>
-            <SolidColorBrush x:Key="MaterialDesignSecondaryColorBrush" Color="{StaticResource CopperColor}"/>
+
+            <SolidColorBrush x:Key="MaterialDesignPrimaryColorBrush" Color="Black"/>
+            <SolidColorBrush x:Key="MaterialDesignSecondaryColorBrush" Color="Black"/>
             <Color x:Key="SandColor">#EACCA3</Color>
             <Color x:Key="CaramelColor">#CE9258</Color>
             <Color x:Key="VeryDarkBrownColor">#280F05</Color>
@@ -34,27 +34,50 @@
             <SolidColorBrush x:Key="CardBackgroundBrush" Color="#1F1B1A" />
             <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#151212" />
             <SolidColorBrush x:Key="MutedTextBrush" Color="#BDB3AA" />
+            <local:ImageSourceConverter x:Key="ImageSourceConverter"/>
 
-            <Style x:Key="AppCardStyle" TargetType="Border">
-                <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}" />
-                <Setter Property="CornerRadius" Value="8" />
-                <Setter Property="Padding" Value="8" />
-                <Setter Property="Margin" Value="8" />
+            <Style x:Key="MediaCardStyle" TargetType="Border">
+                <Setter Property="Background" Value="#2A2422"/>
+                <Setter Property="BorderBrush" Value="#D6A577"/>
+                <Setter Property="BorderThickness" Value="2"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="Margin" Value="10"/>
+                <Setter Property="Width" Value="220"/>
+                <Setter Property="Height" Value="320"/>
                 <Setter Property="Effect">
                     <Setter.Value>
-                        <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="2" Opacity="0.4"/>
+                        <DropShadowEffect Color="#000000" BlurRadius="15" ShadowDepth="3" Opacity="0.5"/>
                     </Setter.Value>
                 </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="BorderBrush" Value="#F5EBDC"/>
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect Color="#D6A577" BlurRadius="20" ShadowDepth="5" Opacity="0.7"/>
+                            </Setter.Value>
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
             </Style>
 
             <Style x:Key="ListItemContainerStyle" TargetType="ListViewItem">
                 <Setter Property="Opacity" Value="0" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListViewItem">
+                            <ContentPresenter/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
                 <Style.Triggers>
                     <EventTrigger RoutedEvent="Loaded">
                         <BeginStoryboard>
                             <Storyboard>
                                 <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                 From="0" To="1" Duration="0:0:0.25"/>
+                                                 From="0" To="1" Duration="0:0:0.3"/>
                             </Storyboard>
                         </BeginStoryboard>
                     </EventTrigger>
@@ -138,7 +161,6 @@
             </StackPanel>
         </DockPanel>
 
-
         <Grid Grid.Row="1" Margin="6">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -148,76 +170,209 @@
             <ListView Name="MediaListView"
                       Grid.Column="0"
                       Margin="6"
-                      ItemContainerStyle="{StaticResource ListItemContainerStyle}">
+                      ItemContainerStyle="{StaticResource ListItemContainerStyle}"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid Columns="3" />
+                        <WrapPanel Orientation="Horizontal" 
+                                   HorizontalAlignment="Center"
+                                   ItemWidth="240"
+                                   ItemHeight="330"/>
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
 
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource AppCardStyle}" Width="260" Height="150">
+                        <Border Style="{StaticResource MediaCardStyle}">
                             <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="100"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="180"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                                <Border Grid.Column="0" Margin="4" CornerRadius="6" Background="#222">
-                                    <Image Source="{Binding CoverImagePath}" Stretch="UniformToFill"/>
+                                <Border Grid.Row="0" CornerRadius="8,8,0,0" Background="#1F1B1A">
+                                    <Image Stretch="UniformToFill">
+                                        <Image.Source>
+                                            <Binding Path="CoverImagePath">
+                                                <Binding.Converter>
+                                                    <local:ImageSourceConverter/>
+                                                </Binding.Converter>
+                                            </Binding>
+                                        </Image.Source>
+                                    </Image>
                                 </Border>
 
-                                <StackPanel Grid.Column="1" Margin="8">
-                                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+                                <StackPanel Grid.Row="1" Margin="10">
+                                    <TextBlock Text="{Binding Title}" 
+                                               FontWeight="Bold" 
+                                               Foreground="#F5EBDC"
+                                               TextWrapping="Wrap"
+                                               FontSize="16"
+                                               MaxHeight="40"
+                                               TextTrimming="CharacterEllipsis"/>
+
                                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                        <TextBlock Text="{Binding MediaType}" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,12,0"/>
-                                        <TextBlock Text="{Binding Year}" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,12,0"/>
-                                        <TextBlock Text="{Binding Genre}" Foreground="{StaticResource MutedTextBrush}"/>
+                                        <TextBlock Text="{Binding MediaType}" 
+                                                   Foreground="#C8B8A8" 
+                                                   Margin="0,0,8,0"
+                                                   FontSize="12"/>
+                                        <TextBlock Text="{Binding Year}" 
+                                                   Foreground="#C8B8A8"
+                                                   FontSize="12"/>
                                     </StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-                                        <TextBlock Text="{Binding Status.Name}" Foreground="{StaticResource GoldBeigeBrush}" Margin="0,0,8,0"/>
-                                        <TextBlock Text="★" Foreground="{StaticResource GoldBeigeBrush}" Margin="0,0,4,0"/>
-                                        <TextBlock Text="{Binding Rating}" Foreground="White"/>
-                                    </StackPanel>
+                                    <TextBlock Text="{Binding Genre}" 
+                                               Foreground="#C8B8A8"
+                                               TextWrapping="Wrap"
+                                               FontSize="12"
+                                               Margin="0,4,0,0"
+                                               MaxHeight="30"
+                                               TextTrimming="CharacterEllipsis"/>
                                 </StackPanel>
+
+                                <Border Grid.Row="2" 
+                                        Background="#D6A577" 
+                                        CornerRadius="0,0,8,8"
+                                        Height="30">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" 
+                                                   Text="{Binding Status.Name}" 
+                                                   Foreground="#1F1B1A"
+                                                   FontWeight="Medium"
+                                                   Margin="10,0,0,0"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="11"/>
+
+                                        <StackPanel Grid.Column="1" 
+                                                    Orientation="Horizontal" 
+                                                    Margin="0,0,10,0"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock Text="★" 
+                                                       Foreground="#1F1B1A"
+                                                       FontWeight="Bold"
+                                                       Margin="0,0,2,0"/>
+                                            <TextBlock Text="{Binding Rating, StringFormat={}{0:F1}}" 
+                                                       Foreground="#1F1B1A"
+                                                       FontWeight="Bold"
+                                                       FontSize="12"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
                             </Grid>
                         </Border>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
 
-            <Border Grid.Column="1" Background="{StaticResource PanelBackgroundBrush}"
-                    CornerRadius="8" Padding="12" Margin="6">
+            <Border Grid.Column="1" 
+                    Background="{StaticResource PanelBackgroundBrush}"
+                    CornerRadius="8" 
+                    Padding="12" 
+                    Margin="6">
                 <ScrollViewer>
-                    <StackPanel  Name="DetailPanel" Margin="6" >
-                        <TextBlock Text="Детальная информация" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                    <StackPanel Name="DetailPanel" Margin="6">
+                        <TextBlock Text="Детальная информация" 
+                                   FontSize="16" 
+                                   FontWeight="Bold" 
+                                   Foreground="White"
+                                   Margin="0,0,0,10"/>
 
-                        <TextBlock Text="Название:" Foreground="{StaticResource MutedTextBrush}" Margin="0,12,0,0"/>
-                        <TextBlock Name="DetailTitle" Foreground="White"/>
+                        <Border CornerRadius="6" 
+                                Background="#2A2422" 
+                                Height="200"
+                                Margin="0,0,0,15">
+                            <Image Stretch="UniformToFill">
+                                <Image.Source>
+                                    <Binding Path="SelectedItem.CoverImagePath" ElementName="MediaListView">
+                                        <Binding.Converter>
+                                            <local:ImageSourceConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </Image.Source>
+                            </Image>
+                        </Border>
 
-                        <TextBlock Text="Тип:" Foreground="{StaticResource MutedTextBrush}" Margin="0,12,0,0"/>
-                        <TextBlock Name="DetailType" Foreground="White"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                        <TextBlock Text="Год:" Foreground="{StaticResource MutedTextBrush}" Margin="0,12,0,0"/>
-                        <TextBlock Name="DetailYear" Foreground="White"/>
+                            <TextBlock Grid.Row="0" Grid.Column="0" 
+                                       Text="Название:" 
+                                       Foreground="{StaticResource MutedTextBrush}" 
+                                       Margin="0,5,10,5"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" 
+                                       Name="DetailTitle" 
+                                       Foreground="White"
+                                       TextWrapping="Wrap"/>
 
-                        <TextBlock Text="Жанр:" Foreground="{StaticResource MutedTextBrush}" Margin="0,12,0,0"/>
-                        <TextBlock Name="DetailGenre" Foreground="White"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" 
+                                       Text="Тип:" 
+                                       Foreground="{StaticResource MutedTextBrush}" 
+                                       Margin="0,5,10,5"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" 
+                                       Name="DetailType" 
+                                       Foreground="White"/>
 
-                        <TextBlock Text="Статус:" Foreground="{StaticResource MutedTextBrush}" Margin="0,12,0,0"/>
-                        <TextBlock Name="DetailStatus" Foreground="White"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" 
+                                       Text="Год:" 
+                                       Foreground="{StaticResource MutedTextBrush}" 
+                                       Margin="0,5,10,5"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" 
+                                       Name="DetailYear" 
+                                       Foreground="White"/>
 
-                        <TextBlock Text="Рейтинг:" Foreground="{StaticResource MutedTextBrush}" Margin="0,12,0,0"/>
-                        <TextBlock Name="DetailRating" Foreground="White"/>
+                            <TextBlock Grid.Row="3" Grid.Column="0" 
+                                       Text="Жанр:" 
+                                       Foreground="{StaticResource MutedTextBrush}" 
+                                       Margin="0,5,10,5"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" 
+                                       Name="DetailGenre" 
+                                       Foreground="White"/>
 
-                        <TextBlock Text="Дата добавления:" Foreground="{StaticResource MutedTextBrush}" Margin="0,12,0,0"/>
-                        <TextBlock Name="DetailDateAdded" Foreground="White"/>
+                            <TextBlock Grid.Row="4" Grid.Column="0" 
+                                       Text="Статус:" 
+                                       Foreground="{StaticResource MutedTextBrush}" 
+                                       Margin="0,5,10,5"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" 
+                                       Name="DetailStatus" 
+                                       Foreground="White"/>
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" 
+                                       Text="Рейтинг:" 
+                                       Foreground="{StaticResource MutedTextBrush}" 
+                                       Margin="0,5,10,5"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" 
+                                       Name="DetailRating" 
+                                       Foreground="White"/>
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" 
+                                       Text="Дата добавления:" 
+                                       Foreground="{StaticResource MutedTextBrush}" 
+                                       Margin="0,5,10,5"/>
+                            <TextBlock Grid.Row="6" Grid.Column="1" 
+                                       Name="DetailDateAdded" 
+                                       Foreground="White"/>
+                        </Grid>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
         </Grid>
-
     </Grid>
 </Window>
