@@ -9,6 +9,9 @@ using MediaCatalog.Patterns.Services;
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Input;
+using System.Windows.Shapes;
 
 namespace MediaCatalog.Views
 {
@@ -29,6 +32,7 @@ namespace MediaCatalog.Views
 
             InitializeMusicList();
             SetupProgressTimer();
+            SetupVisualizer();
         }
 
         private void InitializeMusicList()
@@ -228,6 +232,21 @@ namespace MediaCatalog.Views
             _isUserDraggingSlider = false;
         }
 
+        private void ProgressSlider_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            _isUserDraggingSlider = true;
+        }
+
+        private void ProgressSlider_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            _isUserDraggingSlider = false;
+            if (MediaPlayer.NaturalDuration.HasTimeSpan)
+            {
+                MediaPlayer.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
+                UpdateTimeDisplay(MediaPlayer.Position, MediaPlayer.NaturalDuration.TimeSpan);
+            }
+        }
+
         protected override void OnClosed(EventArgs e)
         {
             _progressTimer.Stop();
@@ -235,5 +254,43 @@ namespace MediaCatalog.Views
             MediaPlayer.Close();
             base.OnClosed(e);
         }
+        private Random _random = new Random();
+
+        private void SetupVisualizer()
+        {
+            _progressTimer.Tick += (s, e) =>
+            {
+                if (!_isUserDraggingSlider && MediaPlayer.NaturalDuration.HasTimeSpan)
+                {
+                    ProgressSlider.Value = MediaPlayer.Position.TotalSeconds;
+                    UpdateTimeDisplay(MediaPlayer.Position, MediaPlayer.NaturalDuration.TimeSpan);
+
+                    AnimateVisualizer();
+                }
+            };
+        }
+        private void AnimateVisualizer()
+        {
+           
+            foreach (var child in VisualizerPanel.Children)
+            {
+                if (child is Rectangle rect)
+                {
+                    double newHeight = _random.Next(10, 90);
+
+                    var animation = new DoubleAnimation()
+                    {
+                        To = newHeight,
+                        Duration = TimeSpan.FromMilliseconds(250),
+                        EasingFunction = new QuadraticEase() { EasingMode = EasingMode.EaseOut }
+                    };
+                    rect.BeginAnimation(Rectangle.HeightProperty, animation);
+                }
+            }
+        }
+
+    
+
+
     }
 }

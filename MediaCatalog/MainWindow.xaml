@@ -6,178 +6,171 @@
         xmlns:local="clr-namespace:MediaCatalog"
         Title="Media Catalog"
         Width="1280"
-        Height="720"
+        Height="800"
         WindowStartupLocation="CenterScreen"
-        Background="{DynamicResource MaterialDesignPaper}">
+        Background="#0F0F12">
 
     <Window.Resources>
+
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml"/>
                 <materialDesign:BundledTheme BaseTheme="Dark"
-                             PrimaryColor="Brown"
-                             SecondaryColor="Amber" />
+                                             PrimaryColor="DeepPurple"
+                                             SecondaryColor="Amber"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <SolidColorBrush x:Key="MaterialDesignPrimaryColorBrush" Color="Black"/>
-            <SolidColorBrush x:Key="MaterialDesignSecondaryColorBrush" Color="Black"/>
-            <Color x:Key="SandColor">#EACCA3</Color>
-            <Color x:Key="CaramelColor">#CE9258</Color>
-            <Color x:Key="VeryDarkBrownColor">#280F05</Color>
-            <Color x:Key="GoldBeigeColor">#DAB17D</Color>
-            <Color x:Key="DeepBrownColor">#653F1F</Color>
-            <Color x:Key="CopperColor">#B66F3A</Color>
+            <SolidColorBrush x:Key="CardBackground" Color="#1B1B22"/>
+            <SolidColorBrush x:Key="GlassBackground" Color="#AA1C1C24"/>
+            <SolidColorBrush x:Key="MutedText" Color="#A6A6B3"/>
 
-            <SolidColorBrush x:Key="GoldBeigeBrush" Color="{StaticResource GoldBeigeColor}" />
-            <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource CaramelColor}" />
-            <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource CopperColor}" />
-            <SolidColorBrush x:Key="CardBackgroundBrush" Color="#1F1B1A" />
-            <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#151212" />
-            <SolidColorBrush x:Key="MutedTextBrush" Color="#BDB3AA" />
             <local:ImageSourceConverter x:Key="ImageSourceConverter"/>
 
-            <Style x:Key="MediaCardStyle" TargetType="Border">
-                <Setter Property="Background" Value="#2A2422"/>
-                <Setter Property="BorderBrush" Value="#D6A577"/>
-                <Setter Property="BorderThickness" Value="2"/>
-                <Setter Property="CornerRadius" Value="10"/>
-                <Setter Property="Margin" Value="10"/>
-                <Setter Property="Width" Value="220"/>
-                <Setter Property="Height" Value="320"/>
-                <Setter Property="Effect">
+            <Style x:Key="ActionButtonStyle" TargetType="Button">
+                <Setter Property="Height" Value="40"/>
+                <Setter Property="Margin" Value="4"/>
+                <Setter Property="Padding" Value="14,6"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Background" Value="#2A2A36"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
                     <Setter.Value>
-                        <DropShadowEffect Color="#000000" BlurRadius="15" ShadowDepth="3" Opacity="0.5"/>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="12">
+                                <ContentPresenter
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
                     </Setter.Value>
                 </Setter>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="BorderBrush" Value="#F5EBDC"/>
+                        <Setter Property="Background" Value="#3A3A4A"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="MediaCardStyle" TargetType="Border">
+                <Setter Property="Width" Value="220"/>
+                <Setter Property="Height" Value="320"/>
+                <Setter Property="Margin" Value="12"/>
+                <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+                <Setter Property="CornerRadius" Value="18"/>
+                <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                <Setter Property="RenderTransform">
+                    <Setter.Value>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect BlurRadius="20"
+                                          ShadowDepth="4"
+                                          Opacity="0.4"/>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="RenderTransform">
+                            <Setter.Value>
+                                <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
+                            </Setter.Value>
+                        </Setter>
                         <Setter Property="Effect">
                             <Setter.Value>
-                                <DropShadowEffect Color="#D6A577" BlurRadius="20" ShadowDepth="5" Opacity="0.7"/>
+                                <DropShadowEffect BlurRadius="30"
+                                                  ShadowDepth="6"
+                                                  Opacity="0.7"/>
                             </Setter.Value>
                         </Setter>
                     </Trigger>
                 </Style.Triggers>
             </Style>
 
-            <Style x:Key="ListItemContainerStyle" TargetType="ListViewItem">
-                <Setter Property="Opacity" Value="0" />
-                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                <Setter Property="VerticalContentAlignment" Value="Stretch"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="ListViewItem">
-                            <ContentPresenter/>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <EventTrigger RoutedEvent="Loaded">
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                 From="0" To="1" Duration="0:0:0.3"/>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                </Style.Triggers>
-            </Style>
-
         </ResourceDictionary>
     </Window.Resources>
 
-    <Grid Margin="8">
+    <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="6" LastChildFill="False">
+        <DockPanel Grid.Row="0" Margin="6">
 
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center" Margin="6">
 
-                <Button Style="{StaticResource MaterialDesignOutlinedButton}" Width="120" Height="36" Margin="4"
-                        Click="AddButton_Click">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Width="768">
+                <Button Style="{StaticResource ActionButtonStyle}" Click="AddButton_Click" Width="115">
                     <StackPanel Orientation="Horizontal">
-                        <fa:ImageAwesome Icon="Plus" Width="16" Margin="0,0,8,0"/>
+                        <fa:ImageAwesome Icon="Plus" Width="14" Margin="0,0,6,0"/>
                         <TextBlock Text="Добавить"/>
                     </StackPanel>
                 </Button>
 
-                <Button Style="{StaticResource MaterialDesignOutlinedButton}" Width="120" Height="36" Margin="4"
-                        Click="ChangeStatusButton_Click">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:ImageAwesome Icon="Check" Width="16" Margin="0,0,8,0"/>
-                        <TextBlock Text="Завершить"/>
-                    </StackPanel>
+                <Button Style="{StaticResource ActionButtonStyle}" Click="ChangeStatusButton_Click" Width="115">
+                    <TextBlock Text="Завершить"/>
                 </Button>
 
-                <Button Style="{StaticResource MaterialDesignOutlinedButton}" Width="120" Height="36" Margin="4"
-                        Click="StartProgressButton_Click">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:ImageAwesome Icon="Play" Width="16" Margin="0,0,8,0"/>
-                        <TextBlock Text="В процессе"/>
-                    </StackPanel>
+                <Button Style="{StaticResource ActionButtonStyle}" Click="StartProgressButton_Click" Width="115">
+                    <TextBlock Text="В процессе"/>
                 </Button>
 
-                <Button Style="{StaticResource MaterialDesignOutlinedButton}" Width="120" Height="36" Margin="4"
-                        Click="PlanButton_Click">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:ImageAwesome Icon="Calendar" Width="16" Margin="0,0,8,0"/>
-                        <TextBlock Text="В планы"/>
-                    </StackPanel>
+                <Button Style="{StaticResource ActionButtonStyle}" Click="PlanButton_Click" Width="115">
+                    <TextBlock Text="В планы"/>
                 </Button>
 
-                <Button Style="{StaticResource MaterialDesignFlatButton}" Width="120" Height="36" Margin="4"
-                        Click="DeleteButton_Click">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:ImageAwesome Icon="Trash" Width="16" Margin="0,0,8,0"/>
-                        <TextBlock Text="Удалить"/>
-                    </StackPanel>
+                <Button Style="{StaticResource ActionButtonStyle}" Click="DeleteButton_Click" Width="115">
+                    <TextBlock Text="Удалить"/>
                 </Button>
             </StackPanel>
 
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" Margin="6">
 
-                <TextBox Name="SearchBox" Width="230" Height="60" Margin="4"
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" Width="470">
+
+                <TextBox x:Name="SearchBox"
+                         Width="220"
+                         Height="53"
+                         Margin="4"
+                         
                          materialDesign:HintAssist.Hint="Поиск..."
                          TextChanged="SearchBox_TextChanged"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                         GotFocus="SearchBox_GotFocus"
+                         LostFocus="SearchBox_LostFocus"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Text=""/>
 
-                <ComboBox Name="FilterComboBox" Width="160" Height="60" Margin="4"
+                <ComboBox x:Name="FilterComboBox"
+                          Width="160"
+                          Height="54"
+                          Margin="4"
                           SelectionChanged="FilterComboBox_SelectionChanged"
                           Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
 
-                <Button Style="{StaticResource MaterialDesignOutlinedButton}" 
-            Width="120" Height="36" Margin="4"
-            Click="MusicButton_Click">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:ImageAwesome Icon="Music" Width="16" Margin="0,0,8,0"/>
-                        <TextBlock Text="Моя музыка"/>
-                    </StackPanel>
+                <Button Style="{StaticResource ActionButtonStyle}"
+                        Click="MusicButton_Click">
+                    <fa:ImageAwesome Icon="Music" Width="63" Height="30"/>
                 </Button>
 
             </StackPanel>
         </DockPanel>
 
-        <Grid Grid.Row="1" Margin="6">
+
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="340"/>
             </Grid.ColumnDefinitions>
 
-            <ListView Name="MediaListView"
+            <ListView x:Name="MediaListView"
                       Grid.Column="0"
                       Margin="6"
-                      ItemContainerStyle="{StaticResource ListItemContainerStyle}"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" 
-                                   HorizontalAlignment="Center"
-                                   ItemWidth="240"
-                                   ItemHeight="330"/>
+                        <WrapPanel HorizontalAlignment="Center"/>
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
 
@@ -186,83 +179,27 @@
                         <Border Style="{StaticResource MediaCardStyle}">
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="180"/>
+                                    <RowDefinition Height="265"/>
                                     <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <Border Grid.Row="0" CornerRadius="8,8,0,0" Background="#1F1B1A">
-                                    <Image Stretch="UniformToFill">
-                                        <Image.Source>
-                                            <Binding Path="CoverImagePath">
-                                                <Binding.Converter>
-                                                    <local:ImageSourceConverter/>
-                                                </Binding.Converter>
-                                            </Binding>
-                                        </Image.Source>
-                                    </Image>
-                                </Border>
+                                <Image Grid.Row="0"
+                                       Stretch="UniformToFill"
+                                       Source="{Binding CoverImagePath,
+                                       Converter={StaticResource ImageSourceConverter}}"/>
 
-                                <StackPanel Grid.Row="1" Margin="10">
-                                    <TextBlock Text="{Binding Title}" 
-                                               FontWeight="Bold" 
-                                               Foreground="#F5EBDC"
-                                               TextWrapping="Wrap"
-                                               FontSize="16"
-                                               MaxHeight="40"
-                                               TextTrimming="CharacterEllipsis"/>
+                                <Border Grid.Row="1" Padding="12">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}"
+                                                   Foreground="White"
+                                                   FontWeight="Bold"
+                                                   TextWrapping="Wrap"
+                                                   MaxHeight="42"/>
 
-                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                        <TextBlock Text="{Binding MediaType}" 
-                                                   Foreground="#C8B8A8" 
-                                                   Margin="0,0,8,0"
-                                                   FontSize="12"/>
-                                        <TextBlock Text="{Binding Year}" 
-                                                   Foreground="#C8B8A8"
+                                        <TextBlock Text="{Binding Year}"
+                                                   Foreground="{StaticResource MutedText}"
                                                    FontSize="12"/>
                                     </StackPanel>
-
-                                    <TextBlock Text="{Binding Genre}" 
-                                               Foreground="#C8B8A8"
-                                               TextWrapping="Wrap"
-                                               FontSize="12"
-                                               Margin="0,4,0,0"
-                                               MaxHeight="30"
-                                               TextTrimming="CharacterEllipsis"/>
-                                </StackPanel>
-
-                                <Border Grid.Row="2" 
-                                        Background="#D6A577" 
-                                        CornerRadius="0,0,8,8"
-                                        Height="30">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <TextBlock Grid.Column="0" 
-                                                   Text="{Binding Status.Name}" 
-                                                   Foreground="#1F1B1A"
-                                                   FontWeight="Medium"
-                                                   Margin="10,0,0,0"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="11"/>
-
-                                        <StackPanel Grid.Column="1" 
-                                                    Orientation="Horizontal" 
-                                                    Margin="0,0,10,0"
-                                                    VerticalAlignment="Center">
-                                            <TextBlock Text="★" 
-                                                       Foreground="#1F1B1A"
-                                                       FontWeight="Bold"
-                                                       Margin="0,0,2,0"/>
-                                            <TextBlock Text="{Binding Rating, StringFormat={}{0:F1}}" 
-                                                       Foreground="#1F1B1A"
-                                                       FontWeight="Bold"
-                                                       FontSize="12"/>
-                                        </StackPanel>
-                                    </Grid>
                                 </Border>
                             </Grid>
                         </Border>
@@ -270,109 +207,36 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <Border Grid.Column="1" 
-                    Background="{StaticResource PanelBackgroundBrush}"
-                    CornerRadius="8" 
-                    Padding="12" 
-                    Margin="6">
+            <Border Grid.Column="1"
+                    Margin="6"
+                    CornerRadius="20"
+                    Background="{StaticResource GlassBackground}">
+
+                <Border.Effect>
+                    <BlurEffect Radius="0"/>
+                </Border.Effect>
+
                 <ScrollViewer>
-                    <StackPanel Name="DetailPanel" Margin="6">
-                        <TextBlock Text="Детальная информация" 
-                                   FontSize="16" 
-                                   FontWeight="Bold" 
+                    <StackPanel x:Name="DetailPanel" Margin="16">
+
+                        <TextBlock Text="Детали"
+                                   FontSize="18"
+                                   FontWeight="Bold"
                                    Foreground="White"
-                                   Margin="0,0,0,10"/>
+                                   Margin="0,0,0,12"/>
 
-                        <Border CornerRadius="6" 
-                                Background="#2A2422" 
-                                Height="200"
-                                Margin="0,0,0,15">
-                            <Image Stretch="UniformToFill">
-                                <Image.Source>
-                                    <Binding Path="SelectedItem.CoverImagePath" ElementName="MediaListView">
-                                        <Binding.Converter>
-                                            <local:ImageSourceConverter/>
-                                        </Binding.Converter>
-                                    </Binding>
-                                </Image.Source>
-                            </Image>
-                        </Border>
+                        <TextBlock x:Name="DetailTitle" Foreground="White"/>
+                        <TextBlock x:Name="DetailType" Foreground="{StaticResource MutedText}"/>
+                        <TextBlock x:Name="DetailYear" Foreground="{StaticResource MutedText}"/>
+                        <TextBlock x:Name="DetailGenre" Foreground="{StaticResource MutedText}"/>
+                        <TextBlock x:Name="DetailStatus" Foreground="{StaticResource MutedText}"/>
+                        <TextBlock x:Name="DetailRating" Foreground="{StaticResource MutedText}"/>
+                        <TextBlock x:Name="DetailDateAdded" Foreground="{StaticResource MutedText}"/>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Grid.Row="0" Grid.Column="0" 
-                                       Text="Название:" 
-                                       Foreground="{StaticResource MutedTextBrush}" 
-                                       Margin="0,5,10,5"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" 
-                                       Name="DetailTitle" 
-                                       Foreground="White"
-                                       TextWrapping="Wrap"/>
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" 
-                                       Text="Тип:" 
-                                       Foreground="{StaticResource MutedTextBrush}" 
-                                       Margin="0,5,10,5"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" 
-                                       Name="DetailType" 
-                                       Foreground="White"/>
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" 
-                                       Text="Год:" 
-                                       Foreground="{StaticResource MutedTextBrush}" 
-                                       Margin="0,5,10,5"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" 
-                                       Name="DetailYear" 
-                                       Foreground="White"/>
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" 
-                                       Text="Жанр:" 
-                                       Foreground="{StaticResource MutedTextBrush}" 
-                                       Margin="0,5,10,5"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" 
-                                       Name="DetailGenre" 
-                                       Foreground="White"/>
-
-                            <TextBlock Grid.Row="4" Grid.Column="0" 
-                                       Text="Статус:" 
-                                       Foreground="{StaticResource MutedTextBrush}" 
-                                       Margin="0,5,10,5"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" 
-                                       Name="DetailStatus" 
-                                       Foreground="White"/>
-
-                            <TextBlock Grid.Row="5" Grid.Column="0" 
-                                       Text="Рейтинг:" 
-                                       Foreground="{StaticResource MutedTextBrush}" 
-                                       Margin="0,5,10,5"/>
-                            <TextBlock Grid.Row="5" Grid.Column="1" 
-                                       Name="DetailRating" 
-                                       Foreground="White"/>
-
-                            <TextBlock Grid.Row="6" Grid.Column="0" 
-                                       Text="Дата добавления:" 
-                                       Foreground="{StaticResource MutedTextBrush}" 
-                                       Margin="0,5,10,5"/>
-                            <TextBlock Grid.Row="6" Grid.Column="1" 
-                                       Name="DetailDateAdded" 
-                                       Foreground="White"/>
-                        </Grid>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
+
         </Grid>
     </Grid>
 </Window>

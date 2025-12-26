@@ -1,165 +1,177 @@
 ﻿<Window x:Class="MediaCatalog.Views.MusicPlayerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:fa="clr-namespace:FontAwesome.WPF;assembly=FontAwesome.WPF"
-        mc:Ignorable="d"
         Title="Моя музыка"
-        Height="600"
+        Height="650"
         Width="900"
         WindowStartupLocation="CenterOwner"
-        Background="#1F1B1A">
+        Background="#0D1B2A">
 
+    
     <Window.Resources>
-        <SolidColorBrush x:Key="CaramelBrush" Color="#FFD6A577"/>
-        <SolidColorBrush x:Key="SoftGoldBrush" Color="#FFE8D0A9"/>
-        <SolidColorBrush x:Key="LightBrownBrush" Color="#FF3A2F2A"/>
-        <SolidColorBrush x:Key="TextBrush" Color="#FFF5EBDC"/>
-        <SolidColorBrush x:Key="LabelBrush" Color="#FFC8B8A8"/>
-        <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#151212"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#1DE9B6"/>
+        
+        
+        <SolidColorBrush x:Key="AccentBrushHover" Color="#00BFA5"/>
+        <SolidColorBrush x:Key="PanelBrush" Color="#162B43"/>
+
+        
+        <SolidColorBrush x:Key="ButtonBackground" Color="#203E5F"/>
+        
+        
+        <SolidColorBrush x:Key="ButtonBackgroundHover" Color="#1DE9B6"/>
+        <SolidColorBrush x:Key="ButtonForeground" Color="White"/>
+        <SolidColorBrush x:Key="ButtonForegroundHover" Color="#0D1B2A"/>
 
         <Style TargetType="Button">
-            <Setter Property="Foreground" Value="#1F1B1A"/>
-            <Setter Property="Background" Value="{StaticResource CaramelBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource SoftGoldBrush}"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="Padding" Value="5 3"/>
-            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{StaticResource ButtonForeground}"/>
+            <Setter Property="Background" Value="{StaticResource ButtonBackground}"/>
+            <Setter Property="Padding" Value="10,5"/>
             <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ButtonBackgroundHover}"/>
+                                <Setter Property="Foreground" Value="{StaticResource ButtonForegroundHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#00A087"/>
+                               
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style TargetType="Slider">
-            <Setter Property="Foreground" Value="{StaticResource CaramelBrush}"/>
-            <Setter Property="Background" Value="#2A2422"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="Background" Value="#203E5F"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Rectangle x:Name="PART_TrackBackground" Height="6" VerticalAlignment="Center" Fill="{TemplateBinding Background}" RadiusY="3" RadiusX="3"/>
+                            <Rectangle x:Name="PART_TrackFill" Height="6" VerticalAlignment="Center" Fill="{TemplateBinding Foreground}" RadiusY="3" RadiusX="3" Width="0"/>
+                            <Thumb x:Name="Thumb" Width="16" Height="16" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1" Background="{StaticResource AccentBrush}" >
+                                <Thumb.Template>
+                                    <ControlTemplate TargetType="Thumb">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                                CornerRadius="8"/>
+                                    </ControlTemplate>
+                                </Thumb.Template>
+                            </Thumb>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Thumb" Property="Background" Value="{StaticResource ButtonBackgroundHover}"/>
+                                <Setter TargetName="Thumb" Property="BorderBrush" Value="{StaticResource ButtonBackgroundHover}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
-    <Grid Margin="10">
+    <Grid Margin="10" >
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="120"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0 0 0 10">
-            <Button x:Name="LoadMusicButton" Click="LoadMusicButton_Click" Margin="0 0 10 0">
-                <StackPanel Orientation="Horizontal">
-                    <fa:ImageAwesome Icon="FolderOpen" Width="16" Margin="0 0 5 0"/>
-                    <TextBlock Text="Загрузить музыку"/>
-                </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center" Margin="0 0 0 10">
+            <Button x:Name="LoadMusicButton" Click="LoadMusicButton_Click">
+                Загрузить музыку
             </Button>
-
-            <Button x:Name="PlayButton" Click="PlayButton_Click" Margin="0 0 10 0">
-                <StackPanel Orientation="Horizontal">
-                    <fa:ImageAwesome Icon="Play" Width="16" Margin="0 0 5 0"/>
-                    <TextBlock Text="Воспроизвести"/>
-                </StackPanel>
+            <Button x:Name="PlayButton" Click="PlayButton_Click">
+                Воспроизвести
             </Button>
-
-            <Button x:Name="PauseButton" Click="PauseButton_Click" Margin="0 0 10 0">
-                <StackPanel Orientation="Horizontal">
-                    <fa:ImageAwesome Icon="Pause" Width="16" Margin="0 0 5 0"/>
-                    <TextBlock Text="Пауза"/>
-                </StackPanel>
+            <Button x:Name="PauseButton" Click="PauseButton_Click">
+                Пауза
             </Button>
-
             <Button x:Name="StopButton" Click="StopButton_Click">
-                <StackPanel Orientation="Horizontal">
-                    <fa:ImageAwesome Icon="Stop" Width="16" Margin="0 0 5 0"/>
-                    <TextBlock Text="Стоп"/>
-                </StackPanel>
+                Стоп
             </Button>
         </StackPanel>
 
-        <Border Grid.Row="1" Background="{StaticResource PanelBackgroundBrush}" CornerRadius="8" Padding="10">
-            <ListView x:Name="MusicListView" 
-                      SelectionChanged="MusicListView_SelectionChanged"
-                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="#2A2422" CornerRadius="5" Margin="0 2" Padding="10">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+        <ListView x:Name="MusicListView" Grid.Row="1" Background="{StaticResource PanelBrush}" 
+                  Foreground="White" BorderThickness="0" Margin="0 0 0 10"
+                  SelectionChanged="MusicListView_SelectionChanged">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="#1E2D45" Margin="2" Padding="10" CornerRadius="6" >
+                        <StackPanel>
+                            <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="14" Foreground="White"/>
+                            <TextBlock Text="{Binding Artist}" FontStyle="Italic" Foreground="{StaticResource AccentBrush}"/>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
 
-                                <fa:ImageAwesome Grid.Column="0" 
-                                                Icon="Music" 
-                                                Width="20" 
-                                                Margin="0 0 10 0"
-                                                Foreground="{StaticResource CaramelBrush}"/>
-
-                                <StackPanel Grid.Column="1">
-                                    <TextBlock Text="{Binding Title}" 
-                                               FontWeight="Bold" 
-                                               Foreground="{StaticResource TextBrush}"/>
-                                    <TextBlock Text="{Binding Artist}" 
-                                               Foreground="{StaticResource LabelBrush}"/>
-                                    <TextBlock Text="{Binding Album}" 
-                                               Foreground="{StaticResource LabelBrush}"
-                                               FontStyle="Italic"/>
-                                </StackPanel>
-
-                                <TextBlock Grid.Column="2" 
-                                          Text="{Binding Duration, StringFormat=mm\\:ss}"
-                                          Foreground="{StaticResource LabelBrush}"
-                                          VerticalAlignment="Center"/>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+        <Border Grid.Row="2" Background="{StaticResource PanelBrush}" CornerRadius="10" Padding="10" Margin="0 0 0 10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" x:Name="VisualizerPanel" Height="100" >
+                
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4">
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#1DE9B6" Offset="0"/>
+                            <GradientStop Color="#00BFA5" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+                
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+                <Rectangle Width="8" Height="10" Margin="2" RadiusX="4" RadiusY="4" Fill="{StaticResource AccentBrush}"/>
+            </StackPanel>
         </Border>
 
-        <Border Grid.Row="2" Background="#2A2422" CornerRadius="5" Margin="0 10 0 5" Padding="10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="3" Orientation="Vertical" HorizontalAlignment="Stretch">
+            <TextBlock x:Name="NowPlayingTitle" Text="Трек не выбран" Foreground="White" FontSize="16" FontWeight="Bold" Margin="10,0"/>
+            <TextBlock x:Name="NowPlayingArtist" Text="" Foreground="{StaticResource AccentBrush}" FontStyle="Italic" Margin="10,0 10,10"/>
+            <Slider x:Name="ProgressSlider" Minimum="0" Maximum="100" Value="0" Margin="10 0" 
+                    PreviewMouseLeftButtonDown="ProgressSlider_PreviewMouseLeftButtonDown"
+                    PreviewMouseLeftButtonUp="ProgressSlider_PreviewMouseLeftButtonUp"
+                    />
+            <TextBlock x:Name="NowPlayingTime" Text="00:00 / 00:00" Foreground="#CCC" HorizontalAlignment="Right" Margin="10,5"/>
+        </StackPanel>
 
-                <StackPanel Grid.Column="0">
-                    <TextBlock x:Name="NowPlayingTitle" 
-                               Text="Не выбрано" 
-                               FontWeight="Bold" 
-                               FontSize="14"
-                               Foreground="{StaticResource TextBrush}"/>
-                    <TextBlock x:Name="NowPlayingArtist" 
-                               Text="" 
-                               Foreground="{StaticResource LabelBrush}"/>
-                </StackPanel>
-
-                <TextBlock Grid.Column="1" 
-                          x:Name="NowPlayingTime" 
-                          Text="00:00 / 00:00"
-                          Foreground="{StaticResource LabelBrush}"
-                          VerticalAlignment="Center"/>
-            </Grid>
-        </Border>
-
-        <Grid Grid.Row="3" Margin="0 5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <Slider x:Name="ProgressSlider" 
-                    Grid.Column="1" 
-                    Margin="10 0"
-                    ValueChanged="ProgressSlider_ValueChanged"/>
-        </Grid>
-
-        <MediaElement x:Name="MediaPlayer" 
-                      LoadedBehavior="Manual" 
-                      UnloadedBehavior="Stop"
-                      MediaOpened="MediaPlayer_MediaOpened"
-                      MediaEnded="MediaPlayer_MediaEnded"/>
+        <MediaElement x:Name="MediaPlayer" LoadedBehavior="Manual" UnloadedBehavior="Stop"
+                      MediaOpened="MediaPlayer_MediaOpened" MediaEnded="MediaPlayer_MediaEnded" Visibility="Collapsed"/>
     </Grid>
 </Window>

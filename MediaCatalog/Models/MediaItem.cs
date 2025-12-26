@@ -69,7 +69,7 @@ namespace MediaCatalog.Models
         /// </summary>
         [NotMapped]
         public string MediaType => GetMediaType();
-
+        
         /// <summary>
         /// Дата добавления в локальном времени
         /// </summary>
